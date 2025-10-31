@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monolith Web Store</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #333333;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .subtitle {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .architecture-viz {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .architecture-title {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .service-node {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .service-node:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .service-node.healthy {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+
+        .service-node.unhealthy {
+            background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+        }
+
+        .service-name {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .service-port {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .service-status {
+            margin-top: 10px;
+            font-size: 0.85em;
+            padding: 5px 10px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            display: inline-block;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .panel {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .panel-title {
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            color: #333;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 5px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            width: 100%;
+            font-weight: bold;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .product-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .product-card:hover {
+            border-color: #667eea;
+            transform: scale(1.05);
+        }
+
+        .product-card.selected {
+            border-color: #667eea;
+            background: #e8eaf6;
+        }
+
+        .product-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .product-price {
+            color: #11998e;
+            font-size: 1.2em;
+            margin: 5px 0;
+        }
+
+        .product-stock {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .activity-log {
+            max-height: 400px;
+            overflow-y: auto;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .log-entry {
+            padding: 10px;
+            margin-bottom: 10px;
+            background: white;
+            border-radius: 5px;
+            border-left: 4px solid #667eea;
+            font-size: 0.9em;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .log-entry.success {
+            border-left-color: #11998e;
+        }
+
+        .log-entry.error {
+            border-left-color: #eb3349;
+        }
+
+        .log-timestamp {
+            color: #999;
+            font-size: 0.85em;
+            margin-bottom: 5px;
+        }
+
+        .orders-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .order-item {
+            background: #f8f9fa;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border-left: 4px solid #11998e;
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+        .order-id {
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .order-total {
+            color: #11998e;
+            font-weight: bold;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: #333333;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>🛍 Monolith Web Store</h1>
+            <p class="subtitle">Real-time visualization of a monolithic service</p>
+        </header>
+
+        <div class="architecture-viz">
+            <h2 class="architecture-title">Service Architecture</h2>
+            <div class="services-grid">
+                <div class="service-node" data-service="gateway">
+                    <div class="service-name">Backend</div>
+                    <div class="service-port">:5020</div>
+                    <div class="service-status">Checking...</div>
+                </div>
+            </div>
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalOrders">0</div>
+                    <div class="stat-label">Total Orders</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="totalRevenue">$0</div>
+                    <div class="stat-label">Total Revenue</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="activeUsers">2</div>
+                    <div class="stat-label">Active Users</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="panel">
+                <h2 class="panel-title">📦 Product Catalog</h2>
+                <div class="products-grid" id="productsGrid">
+                    <div class="product-card" data-product-id="1">
+                        <div class="product-name">Laptop</div>
+                        <div class="product-price">$999.99</div>
+                        <div class="product-stock">Stock: 10</div>
+                    </div>
+                    <div class="product-card" data-product-id="2">
+                        <div class="product-name">Mouse</div>
+                        <div class="product-price">$29.99</div>
+                        <div class="product-stock">Stock: 50</div>
+                    </div>
+                    <div class="product-card" data-product-id="3">
+                        <div class="product-name">Keyboard</div>
+                        <div class="product-price">$79.99</div>
+                        <div class="product-stock">Stock: 30</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2 class="panel-title">🛒 Create Order</h2>
+                <form id="orderForm">
+                    <div class="form-group">
+                        <label>User</label>
+                        <select id="userId">
+                            <option value="1">Alice (alice@example.com)</option>
+                            <option value="2">Bob (bob@example.com)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Selected Product</label>
+                        <input type="text" id="selectedProduct" readonly placeholder="Click a product above">
+                        <input type="hidden" id="productId">
+                    </div>
+                    <div class="form-group">
+                        <label>Quantity</label>
+                        <input type="number" id="quantity" value="1" min="1">
+                    </div>
+                    <button type="submit">Place Order</button>
+                </form>
+            </div>
+
+            <div class="panel full-width">
+                <h2 class="panel-title">📋 Recent Orders</h2>
+                <div class="orders-list" id="ordersList">
+                    <p style="color: #999; text-align: center;">No orders yet. Create your first order!</p>
+                </div>
+            </div>
+
+            <div class="panel full-width">
+                <h2 class="panel-title">📊 Activity Log</h2>
+                <div class="activity-log" id="activityLog">
+                    <div class="log-entry">
+                        <div class="log-timestamp">${new Date().toLocaleTimeString()}</div>
+                        <div>Dashboard initialized. Ready to interact with microservices.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const BASE_URL = 'http://127.0.0.1:5020';
+        let selectedProductId = null;
+        let orders = [];
+        let totalRevenue = 0;
+
+        // Product selection
+        document.querySelectorAll('.product-card').forEach(card => {
+            card.addEventListener('click', function () {
+                document.querySelectorAll('.product-card').forEach(c => c.classList.remove('selected'));
+                this.classList.add('selected');
+                selectedProductId = this.dataset.productId;
+                const productName = this.querySelector('.product-name').textContent;
+                const productPrice = this.querySelector('.product-price').textContent;
+                document.getElementById('selectedProduct').value = `${productName} - ${productPrice}`;
+                document.getElementById('productId').value = selectedProductId;
+            });
+        });
+
+        // Order form submission
+        document.getElementById('orderForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const userId = document.getElementById('userId').value;
+            const productId = document.getElementById('productId').value;
+            const quantity = document.getElementById('quantity').value;
+
+            if (!productId) {
+                addLog('Please select a product first', 'error');
+                return;
+            }
+
+            addLog(`Creating order: User ${userId}, Product ${productId}, Qty ${quantity}`, 'info');
+
+            try {
+                const response = await fetch(`${BASE_URL}/orders`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        user_id: parseInt(userId),
+                        product_id: parseInt(productId),
+                        quantity: parseInt(quantity)
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    addLog(`✅ Order #${data.id} created successfully! Total: $${data.total.toFixed(2)}`, 'success');
+                    orders.push(data);
+                    totalRevenue += data.total;
+                    updateOrdersList();
+                    updateStats();
+                    await loadProducts(); // Refresh product stock
+                    document.getElementById('orderForm').reset();
+                    document.getElementById('selectedProduct').value = '';
+                    document.getElementById('productId').value = '';
+                    document.querySelectorAll('.product-card').forEach(c => c.classList.remove('selected'));
+                } else {
+                    addLog(`❌ Order failed: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                addLog(`❌ Network error: ${error.message}`, 'error');
+            }
+        });
+
+        // Load products from service
+        async function loadProducts() {
+            try {
+                const response = await fetch(`${BASE_URL}/products`);
+                if (response.ok) {
+                    const products = await response.json();
+                    const grid = document.getElementById('productsGrid');
+                    grid.innerHTML = products.map(p => `
+                        <div class="product-card" data-product-id="${p.id}">
+                            <div class="product-name">${p.name}</div>
+                            <div class="product-price">$${p.price.toFixed(2)}</div>
+                            <div class="product-stock">Stock: ${p.stock}</div>
+                        </div>
+                    `).join('');
+
+                    // Re-attach event listeners
+                    document.querySelectorAll('.product-card').forEach(card => {
+                        card.addEventListener('click', function () {
+                            document.querySelectorAll('.product-card').forEach(c => c.classList.remove('selected'));
+                            this.classList.add('selected');
+                            selectedProductId = this.dataset.productId;
+                            const productName = this.querySelector('.product-name').textContent;
+                            const productPrice = this.querySelector('.product-price').textContent;
+                            document.getElementById('selectedProduct').value = `${productName} - ${productPrice}`;
+                            document.getElementById('productId').value = selectedProductId;
+                        });
+                    });
+                }
+            } catch (error) {
+                addLog(`Failed to load products: ${error.message}`, 'error');
+            }
+        }
+
+        // Check service health
+        async function checkServiceHealth() {
+            const services = ['gateway', 'users', 'products', 'orders'];
+            const ports = { gateway: 5020, users: 5020, products: 5020, orders: 5020 };
+
+            for (const service of services) {
+                const node = document.querySelector(`[data-service="${service}"]`);
+                const statusEl = node.querySelector('.service-status');
+
+                try {
+                    const response = await fetch(`http://127.0.0.1:${ports[service]}/health`, {
+                        method: 'GET',
+                        signal: AbortSignal.timeout(2000)
+                    });
+
+                    if (response.ok) {
+                        node.classList.add('healthy');
+                        node.classList.remove('unhealthy');
+                        statusEl.textContent = '● Online';
+                    } else {
+                        throw new Error('Unhealthy');
+                    }
+                } catch (error) {
+                    node.classList.add('unhealthy');
+                    node.classList.remove('healthy');
+                    statusEl.textContent = '● Offline';
+                }
+            }
+        }
+
+        // Add log entry
+        function addLog(message, type = 'info') {
+            const log = document.getElementById('activityLog');
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.innerHTML = `
+                <div class="log-timestamp">${new Date().toLocaleTimeString()}</div>
+                <div>${message}</div>
+            `;
+            log.insertBefore(entry, log.firstChild);
+
+            // Keep only last 20 entries
+            while (log.children.length > 20) {
+                log.removeChild(log.lastChild);
+            }
+        }
+
+        // Update orders list
+        function updateOrdersList() {
+            const list = document.getElementById('ordersList');
+            if (orders.length === 0) {
+                list.innerHTML = '<p style="color: #999; text-align: center;">No orders yet. Create your first order!</p>';
+                return;
+            }
+
+            list.innerHTML = orders.slice().reverse().map(order => `
+                <div class="order-item">
+                    <div class="order-header">
+                        <span class="order-id">Order #${order.id}</span>
+                        <span class="order-total">$${order.total.toFixed(2)}</span>
+                    </div>
+                    <div>User ID: ${order.user_id} | Product ID: ${order.product_id} | Qty: ${order.quantity}</div>
+                    <div style="font-size: 0.85em; color: #999; margin-top: 5px;">${order.created_at}</div>
+                </div>
+            `).join('');
+        }
+
+        // Update stats
+        function updateStats() {
+            document.getElementById('totalOrders').textContent = orders.length;
+            document.getElementById('totalRevenue').textContent = `$${totalRevenue.toFixed(2)}`;
+        }
+
+        // Initialize
+        checkServiceHealth();
+        loadProducts();
+
+        // Periodic health checks
+        setInterval(checkServiceHealth, 10000);
+
+        // Periodic product refresh
+        setInterval(loadProducts, 5000);
+    </script>
+</body>
+
+</html>

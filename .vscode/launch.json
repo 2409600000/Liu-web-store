@@ -1,0 +1,46 @@
+{
+    "version": "0.2.0",
+    "compounds": [
+        {
+            "name": "Run Microservices",
+            "configurations": [
+                "Ecommerce API Gateway",
+                "Ecommerce Order Service",
+                "Ecommerce Product Service",
+                "Ecommerce User Service"
+            ]
+        }
+    ],
+    "configurations": [
+        {
+            "name": "Ecommerce Monolith",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/monolith/monolith.py"
+        },
+        {
+            "name": "Ecommerce API Gateway",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/microservices/api_gateway.py"
+        },
+        {
+            "name": "Ecommerce Product Service",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/microservices/product_service.py"
+        },
+        {
+            "name": "Ecommerce Order Service",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/microservices/order_service.py"
+        },
+        {
+            "name": "Ecommerce User Service",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/microservices/user_service.py"
+        }
+    ]
+}
